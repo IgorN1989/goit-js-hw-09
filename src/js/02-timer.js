@@ -13,6 +13,8 @@ const refs = {
   seconds: document.querySelector('[data-seconds]'),
 };
 
+refs.startBtn.disabled = true;
+
 class CountdownTimer {
   constructor({ targetTime, onTick }) {
     this.intervalId = null;
@@ -28,15 +30,21 @@ class CountdownTimer {
 
     this.isActive = true;
 
+    // Не зміг прибрати дублювання.
+    // Якщо не додавати цей код (33-35), то відлік починається через секунду, а не одразу після кліка
+    const deltaTime = new Date(this.targetTime) - Date.now();
+    const timeComponents = this.convertMs(deltaTime);
+    this.onTick(timeComponents);
+
     this.intervalId = setInterval(() => {
       const deltaTime = new Date(this.targetTime) - Date.now();
+      const timeComponents = this.convertMs(deltaTime);
+      this.onTick(timeComponents);
+
       if (deltaTime <= 1000) {
         clearInterval(this.intervalId);
         Notiflix.Notify.success('Time is out');
       }
-
-      const timeComponents = this.convertMs(deltaTime);
-      this.onTick(timeComponents);
     }, 1000);
   }
 
@@ -78,8 +86,6 @@ const flatpickrOptions = {
   },
 };
 flatpickr(refs.input, flatpickrOptions);
-
-refs.startBtn.disabled = true;
 
 refs.startBtn.addEventListener('click', onStartBtnClick);
 
